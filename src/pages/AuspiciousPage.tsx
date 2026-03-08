@@ -337,6 +337,20 @@ export default function AuspiciousPage() {
       {/* Detail Drawer */}
       <DateDetailDrawer date={drawerDate} onClose={() => setDrawerDate(null)} />
 
+      {/* Back to Top */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label="Back to top"
+        className={cn(
+          'fixed bottom-6 right-5 z-40 w-11 h-11 rounded-full flex items-center justify-center',
+          'glass-card border border-gold/30 text-gold shadow-[0_4px_20px_rgba(212,168,67,0.2)]',
+          'transition-all duration-300 hover:bg-gold/10 hover:scale-110 active:scale-95',
+          showBackToTop ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
+        )}
+      >
+        <ArrowUp className="w-4 h-4" />
+      </button>
+
       {/* Hidden ShareCard — captured by html2canvas */}
       {results && selectedEvent && (
         <div
