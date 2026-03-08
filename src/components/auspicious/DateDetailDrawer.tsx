@@ -1,12 +1,14 @@
-import { X, Sparkles, Star } from 'lucide-react';
+import { X, Sparkles, Star, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AuspiciousDate, LuckLevel } from '@/lib/lunarCalendar';
+import { getAuspiciousHours } from '@/lib/lunarCalendar';
+import { useMemo } from 'react';
 
-const LUCK_CONFIG: Record<LuckLevel, { label: string; cls: string; glow: string }> = {
-  '大吉': { label: '大吉', cls: 'bg-gold text-void font-bold', glow: 'shadow-[0_0_12px_rgba(212,168,67,0.5)]' },
-  '吉':   { label: '吉',   cls: 'bg-jade/20 text-jade border border-jade/40', glow: '' },
-  '平':   { label: '平',   cls: 'bg-white/5 text-white/50 border border-white/10', glow: '' },
-  '凶':   { label: '凶',   cls: 'bg-crimson/20 text-crimson border border-crimson/30', glow: '' },
+const LUCK_CONFIG: Record<LuckLevel, { label: string; cls: string; glow: string; rowCls: string }> = {
+  '大吉': { label: '大吉', cls: 'bg-gold text-void font-bold', glow: 'shadow-[0_0_12px_rgba(212,168,67,0.5)]',     rowCls: 'border-gold/30 bg-gold/8' },
+  '吉':   { label: '吉',   cls: 'bg-jade/20 text-jade border border-jade/40', glow: '',                             rowCls: 'border-jade/20 bg-jade/5' },
+  '平':   { label: '平',   cls: 'bg-white/5 text-white/50 border border-white/10', glow: '',                       rowCls: 'border-white/5 bg-transparent' },
+  '凶':   { label: '凶',   cls: 'bg-crimson/20 text-crimson border border-crimson/30', glow: '',                   rowCls: 'border-crimson/15 bg-crimson/5' },
 };
 
 interface Props {
@@ -16,6 +18,7 @@ interface Props {
 
 export function DateDetailDrawer({ date: d, onClose }: Props) {
   const isOpen = !!d;
+  const hours = useMemo(() => d ? getAuspiciousHours(d.date) : [], [d]);
 
   return (
     <>
@@ -87,6 +90,65 @@ export function DateDetailDrawer({ date: d, onClose }: Props) {
                       <div className="text-[10px] text-[hsl(40,20%,50%)] mb-1">{label}</div>
                       <div className="text-gold font-bold text-base leading-tight">{value}</div>
                       {sub && <div className="text-[10px] text-[hsl(40,20%,45%)] mt-1">{sub}</div>}
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* 時辰 Auspicious Hours */}
+              <section className="mb-5">
+                <h3 className="text-[10px] tracking-[0.2em] text-gold/60 uppercase mb-3 flex items-center gap-1.5">
+                  <Clock className="w-3 h-3 text-gold/60" /> 時辰吉凶 · Auspicious Hours
+                </h3>
+
+                {/* Legend */}
+                <div className="flex gap-3 mb-3 flex-wrap">
+                  {(['大吉', '吉', '平', '凶'] as LuckLevel[]).map(l => (
+                    <div key={l} className="flex items-center gap-1">
+                      <span className={cn('text-[10px] px-1.5 py-px rounded-full', LUCK_CONFIG[l].cls)}>
+                        {LUCK_CONFIG[l].label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-2 gap-1.5">
+                  {hours.map((h) => (
+                    <div
+                      key={h.branch}
+                      className={cn(
+                        'flex items-center gap-2.5 rounded-xl px-3 py-2 border transition-all',
+                        LUCK_CONFIG[h.luckLevel].rowCls,
+                        h.luckLevel === '大吉' && 'shadow-[0_0_8px_rgba(212,168,67,0.12)]'
+                      )}
+                    >
+                      {/* Hour name */}
+                      <div className="flex flex-col items-center min-w-[28px]">
+                        <span className={cn(
+                          'text-sm font-bold leading-tight',
+                          h.luckLevel === '大吉' ? 'text-gold' :
+                          h.luckLevel === '吉' ? 'text-jade' :
+                          h.luckLevel === '凶' ? 'text-crimson' :
+                          'text-[hsl(40,15%,55%)]'
+                        )}>
+                          {h.branch}
+                        </span>
+                        <span className="text-[9px] text-[hsl(40,15%,40%)] leading-none mt-0.5">時</span>
+                      </div>
+
+                      {/* Details */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="text-[10px] font-mono text-[hsl(40,25%,55%)]">{h.stemBranch}</span>
+                          <span className={cn('text-[9px] px-1.5 py-px rounded-full ml-auto shrink-0', LUCK_CONFIG[h.luckLevel].cls)}>
+                            {h.luckLevel}
+                          </span>
+                        </div>
+                        <div className="text-[9px] text-[hsl(40,15%,40%)] leading-none">
+                          {h.timeRange}
+                          {h.shen && <span className="ml-1 text-[hsl(40,25%,48%)]">· {h.shen}</span>}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
