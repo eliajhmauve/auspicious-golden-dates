@@ -3,6 +3,7 @@ import { StarfieldBg } from '@/components/auspicious/StarfieldBg';
 import { EventTypeGrid, type EventType } from '@/components/auspicious/EventTypeGrid';
 import { DateCard } from '@/components/auspicious/DateCard';
 import { CalendarView } from '@/components/auspicious/CalendarView';
+import { DateDetailDrawer } from '@/components/auspicious/DateDetailDrawer';
 import { getAuspiciousDates, type AuspiciousDate } from '@/lib/lunarCalendar';
 import { Sparkles, ChevronRight, LayoutGrid, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
