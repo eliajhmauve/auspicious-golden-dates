@@ -7,7 +7,7 @@ import { CalendarView } from '@/components/auspicious/CalendarView';
 import { DateDetailDrawer } from '@/components/auspicious/DateDetailDrawer';
 import { ShareCard } from '@/components/auspicious/ShareCard';
 import { getAuspiciousDates, type AuspiciousDate } from '@/lib/lunarCalendar';
-import { Sparkles, ChevronRight, LayoutGrid, List, Share2, Loader2 } from 'lucide-react';
+import { Sparkles, ChevronRight, LayoutGrid, List, Share2, Loader2, ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const EVENT_LABELS: Record<string, string> = {
