@@ -228,7 +228,7 @@ export default function AuspiciousPage() {
 
         {/* Results */}
         {results !== null && (
-          <div className="space-y-4">
+          <div ref={resultsRef} className="space-y-4">
             {/* Result header */}
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
