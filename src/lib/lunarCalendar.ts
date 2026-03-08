@@ -265,3 +265,122 @@ export function getAuspiciousDates(
 
   return results;
 }
+
+// ─── 時辰 (Auspicious Hours) ──────────────────────────────────────────────────
+
+const HOUR_BRANCHES = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
+const HOUR_TIMES = [
+  '23:00–01:00', '01:00–03:00', '03:00–05:00', '05:00–07:00',
+  '07:00–09:00', '09:00–11:00', '11:00–13:00', '13:00–15:00',
+  '15:00–17:00', '17:00–19:00', '19:00–21:00', '21:00–23:00',
+];
+
+/**
+ * 五鼠遁日起時法 — given the day's stem index (0-9), return the stem index of 子時.
+ * 甲/己(0,5)→甲(0)  乙/庚(1,6)→丙(2)  丙/辛(2,7)→戊(4)  丁/壬(3,8)→庚(6)  戊/癸(4,9)→壬(8)
+ */
+function getHourStartStem(dayStemIdx: number): number {
+  return (dayStemIdx % 5) * 2;
+}
+
+/** 三合 groups: each branch's two san-he partners */
+const SAN_HE: Record<number, number[]> = {
+  0: [4, 8],   // 子–辰–申
+  1: [5, 9],   // 丑–巳–酉
+  2: [6, 10],  // 寅–午–戌
+  3: [7, 11],  // 卯–未–亥
+  4: [8, 0],
+  5: [9, 1],
+  6: [10, 2],
+  7: [11, 3],
+  8: [0, 4],
+  9: [1, 5],
+  10: [2, 6],
+  11: [3, 7],
+};
+
+/** 六合 pairs */
+const LIU_HE: Record<number, number> = {
+  0: 1, 1: 0,   // 子–丑
+  2: 11, 11: 2, // 寅–亥
+  3: 10, 10: 3, // 卯–戌
+  4: 9, 9: 4,   // 辰–酉
+  5: 8, 8: 5,   // 巳–申
+  6: 7, 7: 6,   // 午–未
+};
+
+/** 六沖 pairs */
+const LIU_CHONG: Record<number, number> = {
+  0: 6, 6: 0,   // 子–午
+  1: 7, 7: 1,   // 丑–未
+  2: 8, 8: 2,   // 寅–申
+  3: 9, 9: 3,   // 卯–酉
+  4: 10, 10: 4, // 辰–戌
+  5: 11, 11: 5, // 巳–亥
+};
+
+/** 吉神 labels for flavor */
+const JI_SHEN: string[] = ['天德', '月德', '天乙', '青龍', '明堂', '金匱', '寶光'];
+/** 凶神 labels */
+const XIONG_SHEN: string[] = ['勾陳', '朱雀', '白虎', '天牢', '元武', '天刑'];
+
+export interface HourInfo {
+  branch: string;       // 子, 丑, …
+  name: string;         // 子時, 丑時, …
+  timeRange: string;    // 23:00–01:00
+  stemBranch: string;   // 甲子, 乙丑, …
+  luckLevel: LuckLevel;
+  shen: string;         // auspicious or inauspicious deity label
+}
+
+export function getAuspiciousHours(date: Date): HourInfo[] {
+  const daySB = getStemBranch(date);
+  const dayStemIdx = HEAVENLY_STEMS.indexOf(daySB.stem);
+  const dayBranchIdx = EARTHLY_BRANCHES.indexOf(daySB.branch);
+  const startStem = getHourStartStem(dayStemIdx);
+
+  // Deterministic seed for shen selection
+  const seed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+
+  return HOUR_BRANCHES.map((branch, i) => {
+    const hourStemIdx = (startStem + i) % 10;
+    const hourBranchIdx = i; // 0=子, 1=丑, …
+    const stemBranch = HEAVENLY_STEMS[hourStemIdx] + branch;
+    const isYangStem = hourStemIdx % 2 === 0;
+
+    // Determine luck
+    const isSanHe = SAN_HE[dayBranchIdx]?.includes(hourBranchIdx) || dayBranchIdx === hourBranchIdx;
+    const isLiuHe = LIU_HE[dayBranchIdx] === hourBranchIdx;
+    const isChong = LIU_CHONG[dayBranchIdx] === hourBranchIdx;
+
+    let luckLevel: LuckLevel;
+    let shen: string;
+
+    if (isChong) {
+      luckLevel = '凶';
+      shen = XIONG_SHEN[(seed + i) % XIONG_SHEN.length];
+    } else if (isSanHe && isYangStem) {
+      luckLevel = '大吉';
+      shen = JI_SHEN[(seed + i) % JI_SHEN.length];
+    } else if (isSanHe || isLiuHe) {
+      luckLevel = '吉';
+      shen = JI_SHEN[(seed + i + 2) % JI_SHEN.length];
+    } else if (!isYangStem && hourBranchIdx % 4 === 3) {
+      luckLevel = '凶';
+      shen = XIONG_SHEN[(seed + i + 1) % XIONG_SHEN.length];
+    } else {
+      luckLevel = '平';
+      shen = '';
+    }
+
+    return {
+      branch,
+      name: branch + '時',
+      timeRange: HOUR_TIMES[i],
+      stemBranch,
+      luckLevel,
+      shen,
+    };
+  });
+}
