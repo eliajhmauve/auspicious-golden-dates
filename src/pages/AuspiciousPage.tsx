@@ -250,6 +250,9 @@ export default function AuspiciousPage() {
           </p>
         </div>
       </div>
+
+      {/* Detail Drawer */}
+      <DateDetailDrawer date={drawerDate} onClose={() => setDrawerDate(null)} />
     </div>
   );
 }
