@@ -6,7 +6,7 @@ import { CalendarView } from '@/components/auspicious/CalendarView';
 import { DateDetailDrawer } from '@/components/auspicious/DateDetailDrawer';
 import { ShareCard } from '@/components/auspicious/ShareCard';
 import { getAuspiciousDates, type AuspiciousDate } from '@/lib/lunarCalendar';
-import { Sparkles, ChevronRight, LayoutGrid, List, Share2, Download, Loader2 } from 'lucide-react';
+import { Sparkles, ChevronRight, LayoutGrid, List, Share2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const EVENT_LABELS: Record<string, string> = {
@@ -58,7 +58,7 @@ export default function AuspiciousPage() {
       const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/png'));
       if (!blob) return;
 
-      const rangeLabel = `${MONTH_OPTS[startIdx].label} — ${MONTH_OPTS[endIdx].label}`;
+      const rangeLabel = `${MONTH_OPTS[startIdx].label}—${MONTH_OPTS[endIdx].label}`;
       const filename = `吉日_${EVENT_LABELS[selectedEvent]}_${rangeLabel}.png`;
 
       // Try native share sheet on mobile
@@ -100,6 +100,8 @@ export default function AuspiciousPage() {
         d.date.getMonth() === MONTH_OPTS[calendarMonth].date.getMonth()
       )
     : [];
+
+  const rangeLabel = `${MONTH_OPTS[startIdx].label} — ${MONTH_OPTS[endIdx].label}`;
 
   return (
     <div
@@ -222,28 +224,51 @@ export default function AuspiciousPage() {
                   {selectedEvent && EVENT_LABELS[selectedEvent]} · 吉日清單
                 </h2>
                 <p className="text-xs text-[hsl(40,20%,50%)] mt-0.5">
-                  {MONTH_OPTS[startIdx].label} — {MONTH_OPTS[endIdx].label} · 共 <span className="text-gold font-bold">{results.length}</span> 個吉日
+                  {rangeLabel} · 共 <span className="text-gold font-bold">{results.length}</span> 個吉日
                 </p>
               </div>
-              <div className="flex items-center gap-1 glass-card rounded-xl p-1">
+
+              <div className="flex items-center gap-2">
+                {/* Share button */}
                 <button
-                  onClick={() => setViewMode('list')}
+                  onClick={handleShare}
+                  disabled={sharing || results.length === 0}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
-                    viewMode === 'list' ? 'bg-gold/15 text-gold' : 'text-[hsl(40,20%,50%)] hover:text-gold'
+                    'flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium transition-all border',
+                    sharing || results.length === 0
+                      ? 'border-gold/10 text-[hsl(40,15%,40%)] cursor-not-allowed'
+                      : 'glass-card border-gold/25 text-gold hover:border-gold/50 hover:bg-gold/5 active:scale-95'
                   )}
                 >
-                  <List className="w-3.5 h-3.5" /> 清單
-                </button>
-                <button
-                  onClick={() => setViewMode('calendar')}
-                  className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
-                    viewMode === 'calendar' ? 'bg-gold/15 text-gold' : 'text-[hsl(40,20%,50%)] hover:text-gold'
+                  {sharing ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Share2 className="w-3.5 h-3.5" />
                   )}
-                >
-                  <LayoutGrid className="w-3.5 h-3.5" /> 月曆
+                  {sharing ? '生成中…' : '分享'}
                 </button>
+
+                {/* View toggle */}
+                <div className="flex items-center gap-1 glass-card rounded-xl p-1">
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                      viewMode === 'list' ? 'bg-gold/15 text-gold' : 'text-[hsl(40,20%,50%)] hover:text-gold'
+                    )}
+                  >
+                    <List className="w-3.5 h-3.5" /> 清單
+                  </button>
+                  <button
+                    onClick={() => setViewMode('calendar')}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                      viewMode === 'calendar' ? 'bg-gold/15 text-gold' : 'text-[hsl(40,20%,50%)] hover:text-gold'
+                    )}
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" /> 月曆
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -293,6 +318,26 @@ export default function AuspiciousPage() {
 
       {/* Detail Drawer */}
       <DateDetailDrawer date={drawerDate} onClose={() => setDrawerDate(null)} />
+
+      {/* Hidden ShareCard — captured by html2canvas */}
+      {results && selectedEvent && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '-9999px',
+            left: '-9999px',
+            pointerEvents: 'none',
+            zIndex: -1,
+          }}
+        >
+          <ShareCard
+            ref={shareCardRef}
+            eventType={selectedEvent}
+            rangeLabel={rangeLabel}
+            dates={results}
+          />
+        </div>
+      )}
     </div>
   );
 }
