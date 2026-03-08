@@ -197,10 +197,14 @@ export interface AuspiciousDate {
   solarStr: string;
   lunarStr: string;
   weekday: string;
-  stemBranch: string;
+  stemBranch: string;       // day stem-branch e.g. 甲子日
+  yearStemBranch: string;   // e.g. 乙巳年 (生肖：蛇)
+  monthStemBranch: string;  // e.g. 甲寅月
+  zodiac: string;           // e.g. 蛇
   luckLevel: LuckLevel;
-  yi: string[];
-  ji: string[];
+  yi: string[];             // full list (all activities)
+  ji: string[];             // full list (all avoids)
+  specialNotes: string[];   // special notes for the day
 }
 
 export function getAuspiciousDates(
@@ -237,12 +241,8 @@ export function getAuspiciousDates(
     // Only include 大吉 and 吉 days
     if (luckLevel === '大吉' || luckLevel === '吉') {
       const lunar = getLunarDate(current);
-
-      // Pick subset of yi/ji based on day
-      const yiCount = 3 + (stemIdx % 3);
-      const jiCount = 2 + (branchIdx % 2);
-      const shuffledYi = [...activities.yi].sort(() => (stemIdx + branchIdx) % 2 === 0 ? 1 : -1);
-      const shuffledJi = [...activities.ji].sort(() => (stemIdx + branchIdx) % 2 === 0 ? -1 : 1);
+      const yearInfo = getYearStemBranch(current.getFullYear());
+      const monthSB = getMonthStemBranch(current);
 
       results.push({
         date: new Date(current),
@@ -250,9 +250,13 @@ export function getAuspiciousDates(
         lunarStr: `農曆 ${lunar.lunarMonthStr}${lunar.lunarDayStr}`,
         weekday: getWeekdayZh(current),
         stemBranch: sb.dayName + '日',
+        yearStemBranch: yearInfo.stemBranch,
+        monthStemBranch: monthSB,
+        zodiac: yearInfo.zodiac,
         luckLevel,
-        yi: shuffledYi.slice(0, yiCount),
-        ji: shuffledJi.slice(0, jiCount),
+        yi: activities.yi,
+        ji: activities.ji,
+        specialNotes: getSpecialNotes(current),
       });
     }
 
