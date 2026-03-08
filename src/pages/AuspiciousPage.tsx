@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { StarfieldBg } from '@/components/auspicious/StarfieldBg';
 import { EventTypeGrid, type EventType } from '@/components/auspicious/EventTypeGrid';
 import { DateCard } from '@/components/auspicious/DateCard';
@@ -6,7 +6,7 @@ import { CalendarView } from '@/components/auspicious/CalendarView';
 import { DateDetailDrawer } from '@/components/auspicious/DateDetailDrawer';
 import { ShareCard } from '@/components/auspicious/ShareCard';
 import { getAuspiciousDates, type AuspiciousDate } from '@/lib/lunarCalendar';
-import { Sparkles, ChevronRight, LayoutGrid, List, Share2, Loader2 } from 'lucide-react';
+import { Sparkles, ChevronRight, LayoutGrid, List, Share2, Loader2, ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const EVENT_LABELS: Record<string, string> = {
@@ -34,6 +34,18 @@ const MONTH_OPTS = getMonthOptions();
 
 export default function AuspiciousPage() {
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const inputPanelRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const threshold = (inputPanelRef.current?.offsetTop ?? 300) + (inputPanelRef.current?.offsetHeight ?? 300);
+      setShowBackToTop(window.scrollY > threshold);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   const [startIdx, setStartIdx] = useState(0);
   const [endIdx, setEndIdx] = useState(2);
   const [results, setResults] = useState<AuspiciousDate[] | null>(null);
@@ -137,7 +149,7 @@ export default function AuspiciousPage() {
         </div>
 
         {/* Input Panel */}
-        <div className="glass-card gold-glow-shadow rounded-3xl p-6 sm:p-8 mb-8">
+        <div ref={inputPanelRef} className="glass-card gold-glow-shadow rounded-3xl p-6 sm:p-8 mb-8">
           {/* Event type */}
           <div className="mb-6">
             <label className="block text-xs font-bold tracking-widest text-gold mb-3 uppercase">
@@ -216,7 +228,7 @@ export default function AuspiciousPage() {
 
         {/* Results */}
         {results !== null && (
-          <div className="space-y-4">
+          <div ref={resultsRef} className="space-y-4">
             {/* Result header */}
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
@@ -251,7 +263,10 @@ export default function AuspiciousPage() {
                 {/* View toggle */}
                 <div className="flex items-center gap-1 glass-card rounded-xl p-1">
                   <button
-                    onClick={() => setViewMode('list')}
+                    onClick={() => {
+                      setViewMode('list');
+                      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
                       viewMode === 'list' ? 'bg-gold/15 text-gold' : 'text-[hsl(40,20%,50%)] hover:text-gold'
@@ -260,7 +275,10 @@ export default function AuspiciousPage() {
                     <List className="w-3.5 h-3.5" /> 清單
                   </button>
                   <button
-                    onClick={() => setViewMode('calendar')}
+                    onClick={() => {
+                      setViewMode('calendar');
+                      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
                       viewMode === 'calendar' ? 'bg-gold/15 text-gold' : 'text-[hsl(40,20%,50%)] hover:text-gold'
@@ -318,6 +336,20 @@ export default function AuspiciousPage() {
 
       {/* Detail Drawer */}
       <DateDetailDrawer date={drawerDate} onClose={() => setDrawerDate(null)} />
+
+      {/* Back to Top */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label="Back to top"
+        className={cn(
+          'fixed bottom-6 right-5 z-40 w-11 h-11 rounded-full flex items-center justify-center',
+          'glass-card border border-gold/30 text-gold shadow-[0_4px_20px_rgba(212,168,67,0.2)]',
+          'transition-all duration-300 hover:bg-gold/10 hover:scale-110 active:scale-95',
+          showBackToTop ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
+        )}
+      >
+        <ArrowUp className="w-4 h-4" />
+      </button>
 
       {/* Hidden ShareCard — captured by html2canvas */}
       {results && selectedEvent && (
