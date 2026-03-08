@@ -78,7 +78,6 @@ export function getLunarDate(date: Date): { lunarMonth: number; lunarDay: number
 
 export function getStemBranch(date: Date): { stem: string; branch: string; dayName: string } {
   // Reference: Jan 1, 2000 = 甲子 day (day 0 of 60-cycle)
-  // Actually Jan 1 2000 was Jiachen year, 丁卯 month, 甲子 day -> stem=甲(0), branch=子(0)
   const ref = new Date(2000, 0, 1);
   const days = Math.floor((date.getTime() - ref.getTime()) / 86400000);
   const cycle = ((days % 60) + 60) % 60;
@@ -89,6 +88,52 @@ export function getStemBranch(date: Date): { stem: string; branch: string; dayNa
     branch: EARTHLY_BRANCHES[branchIdx],
     dayName: HEAVENLY_STEMS[stemIdx] + EARTHLY_BRANCHES[branchIdx],
   };
+}
+
+/** Year stem-branch (e.g. 乙巳年) — based on traditional Chinese year reckoning */
+export function getYearStemBranch(year: number): { stemBranch: string; zodiac: string } {
+  // Reference: 1984 = 甲子年
+  const offset = ((year - 1984) % 60 + 60) % 60;
+  const stemIdx = offset % 10;
+  const branchIdx = offset % 12;
+  return {
+    stemBranch: HEAVENLY_STEMS[stemIdx] + EARTHLY_BRANCHES[branchIdx] + '年',
+    zodiac: ZODIAC[branchIdx],
+  };
+}
+
+/** Month stem-branch (approx.) */
+export function getMonthStemBranch(date: Date): string {
+  // Month branch: 寅 = month 1 (Feb), cycle through EARTHLY_BRANCHES offset by 2
+  const mBranchIdx = ((date.getMonth() + 2) % 12);
+  // Month stem depends on year stem: year stem idx determines month stem base
+  const yearOffset = ((date.getFullYear() - 1984) % 60 + 60) % 60;
+  const yearStemIdx = yearOffset % 10;
+  // Month stem base: (yearStemIdx % 5) * 2
+  const mStemBase = (yearStemIdx % 5) * 2;
+  const mStemIdx = (mStemBase + date.getMonth()) % 10;
+  return HEAVENLY_STEMS[mStemIdx] + EARTHLY_BRANCHES[mBranchIdx] + '月';
+}
+
+const SPECIAL_NOTES_POOL = [
+  '此日五行屬土，利穩固之事。',
+  '此日納音為金，宜金屬相關事宜。',
+  '逢月德日，諸事皆宜，尤利婦女。',
+  '逢天德日，主大吉大利，宜重大決策。',
+  '此日宜祈福求神，心誠則靈。',
+  '逢三合日，貴人相助，諸事順遂。',
+  '此日沖煞較輕，擇時尤為重要。',
+  '宜配合黃道時辰，效果更佳。',
+  '逢祿日，財運亨通，宜求財納財。',
+  '此日陽氣旺盛，適合開創新局。',
+];
+
+export function getSpecialNotes(date: Date): string[] {
+  // Deterministically pick 1-2 notes based on date
+  const seed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+  const idx1 = seed % SPECIAL_NOTES_POOL.length;
+  const idx2 = (seed * 7 + 3) % SPECIAL_NOTES_POOL.length;
+  return idx1 === idx2 ? [SPECIAL_NOTES_POOL[idx1]] : [SPECIAL_NOTES_POOL[idx1], SPECIAL_NOTES_POOL[idx2]];
 }
 
 export function getWeekdayZh(date: Date): string {
