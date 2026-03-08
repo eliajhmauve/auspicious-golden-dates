@@ -214,7 +214,7 @@ export default function AuspiciousPage() {
             ) : viewMode === 'list' ? (
               <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1 scrollbar-thin">
                 {results.map((d, i) => (
-                  <DateCard key={i} d={d} />
+                  <DateCard key={i} d={d} onSelect={setDrawerDate} />
                 ))}
               </div>
             ) : (
