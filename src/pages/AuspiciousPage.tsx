@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { StarfieldBg } from '@/components/auspicious/StarfieldBg';
 import { EventTypeGrid, type EventType } from '@/components/auspicious/EventTypeGrid';
 import { DateCard } from '@/components/auspicious/DateCard';
 import { CalendarView } from '@/components/auspicious/CalendarView';
 import { DateDetailDrawer } from '@/components/auspicious/DateDetailDrawer';
+import { ShareCard } from '@/components/auspicious/ShareCard';
 import { getAuspiciousDates, type AuspiciousDate } from '@/lib/lunarCalendar';
-import { Sparkles, ChevronRight, LayoutGrid, List } from 'lucide-react';
+import { Sparkles, ChevronRight, LayoutGrid, List, Share2, Download, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const EVENT_LABELS: Record<string, string> = {
