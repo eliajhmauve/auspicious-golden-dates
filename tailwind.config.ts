@@ -57,6 +57,15 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        void: "hsl(var(--void))",
+        "void-card": "hsl(var(--void-card))",
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          bright: "hsl(var(--gold-bright))",
+          dim: "hsl(var(--gold-dim))",
+        },
+        jade: "hsl(var(--jade))",
+        crimson: "hsl(var(--crimson))",
       },
       borderRadius: {
         lg: "var(--radius)",
