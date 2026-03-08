@@ -34,6 +34,18 @@ const MONTH_OPTS = getMonthOptions();
 
 export default function AuspiciousPage() {
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const inputPanelRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const threshold = (inputPanelRef.current?.offsetTop ?? 300) + (inputPanelRef.current?.offsetHeight ?? 300);
+      setShowBackToTop(window.scrollY > threshold);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   const [startIdx, setStartIdx] = useState(0);
   const [endIdx, setEndIdx] = useState(2);
   const [results, setResults] = useState<AuspiciousDate[] | null>(null);
