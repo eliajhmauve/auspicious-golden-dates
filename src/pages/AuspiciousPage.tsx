@@ -275,7 +275,10 @@ export default function AuspiciousPage() {
                     <List className="w-3.5 h-3.5" /> 清單
                   </button>
                   <button
-                    onClick={() => setViewMode('calendar')}
+                    onClick={() => {
+                      setViewMode('calendar');
+                      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
                       viewMode === 'calendar' ? 'bg-gold/15 text-gold' : 'text-[hsl(40,20%,50%)] hover:text-gold'
