@@ -149,7 +149,7 @@ export default function AuspiciousPage() {
         </div>
 
         {/* Input Panel */}
-        <div className="glass-card gold-glow-shadow rounded-3xl p-6 sm:p-8 mb-8">
+        <div ref={inputPanelRef} className="glass-card gold-glow-shadow rounded-3xl p-6 sm:p-8 mb-8">
           {/* Event type */}
           <div className="mb-6">
             <label className="block text-xs font-bold tracking-widest text-gold mb-3 uppercase">
