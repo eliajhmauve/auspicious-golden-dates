@@ -8,14 +8,18 @@ const LUCK_CONFIG: Record<LuckLevel, { label: string; cls: string; glow: string 
   '凶':   { label: '凶',   cls: 'bg-crimson/20 text-crimson border border-crimson/30', glow: '' },
 };
 
-export function DateCard({ d }: { d: AuspiciousDate }) {
+export function DateCard({ d, onSelect }: { d: AuspiciousDate; onSelect?: (d: AuspiciousDate) => void }) {
   const luck = LUCK_CONFIG[d.luckLevel];
 
   return (
-    <div className={cn(
-      'glass-card glass-card-hover rounded-2xl p-4 sm:p-5 transition-all duration-300',
-      d.luckLevel === '大吉' && 'border-gold/40 shadow-[0_0_24px_rgba(212,168,67,0.1)]'
-    )}>
+    <div
+      onClick={() => onSelect?.(d)}
+      className={cn(
+        'glass-card glass-card-hover rounded-2xl p-4 sm:p-5 transition-all duration-300',
+        onSelect && 'cursor-pointer active:scale-[0.99]',
+        d.luckLevel === '大吉' && 'border-gold/40 shadow-[0_0_24px_rgba(212,168,67,0.1)]'
+      )}
+    >
       <div className="flex flex-col sm:flex-row sm:items-start gap-3">
         {/* Date block */}
         <div className="flex items-center gap-3 sm:flex-col sm:items-center sm:min-w-[88px] sm:text-center">
@@ -52,25 +56,40 @@ export function DateCard({ d }: { d: AuspiciousDate }) {
             <div className="flex gap-2">
               <span className="text-jade font-bold text-sm shrink-0 mt-0.5">宜</span>
               <div className="flex flex-wrap gap-1">
-                {d.yi.map(item => (
+                {d.yi.slice(0, 4).map(item => (
                   <span key={item} className="text-xs px-2 py-0.5 rounded-md bg-jade/10 text-jade/90 border border-jade/20">
                     {item}
                   </span>
                 ))}
+                {d.yi.length > 4 && (
+                  <span className="text-xs px-2 py-0.5 rounded-md bg-jade/5 text-jade/50 border border-jade/10">
+                    +{d.yi.length - 4}
+                  </span>
+                )}
               </div>
             </div>
             {/* 忌 */}
             <div className="flex gap-2">
               <span className="text-crimson font-bold text-sm shrink-0 mt-0.5">忌</span>
               <div className="flex flex-wrap gap-1">
-                {d.ji.map(item => (
+                {d.ji.slice(0, 3).map(item => (
                   <span key={item} className="text-xs px-2 py-0.5 rounded-md bg-crimson/10 text-crimson/80 border border-crimson/20">
                     {item}
                   </span>
                 ))}
+                {d.ji.length > 3 && (
+                  <span className="text-xs px-2 py-0.5 rounded-md bg-crimson/5 text-crimson/50 border border-crimson/10">
+                    +{d.ji.length - 3}
+                  </span>
+                )}
               </div>
             </div>
           </div>
+
+          {/* Tap hint on mobile */}
+          {onSelect && (
+            <p className="text-[10px] text-[hsl(40,15%,40%)] mt-2 sm:hidden">點擊查看完整詳情 →</p>
+          )}
         </div>
       </div>
     </div>

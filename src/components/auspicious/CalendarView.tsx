@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AuspiciousDate } from '@/lib/lunarCalendar';
 import { getLunarDate } from '@/lib/lunarCalendar';
@@ -9,15 +8,16 @@ interface CalendarViewProps {
   month: Date;
   onPrev: () => void;
   onNext: () => void;
+  onSelectDate?: (d: AuspiciousDate) => void;
 }
 
 const WEEKDAY_HEADERS = ['日', '一', '二', '三', '四', '五', '六'];
 const MONTH_NAMES = ['一月', '二月', '三月', '四月', '五月', '六月',
                      '七月', '八月', '九月', '十月', '十一月', '十二月'];
 
-export function CalendarView({ dates, month, onPrev, onNext }: CalendarViewProps) {
-  const auspSet = new Set(
-    dates.map(d => `${d.date.getFullYear()}-${d.date.getMonth()}-${d.date.getDate()}`)
+export function CalendarView({ dates, month, onPrev, onNext, onSelectDate }: CalendarViewProps) {
+  const dateMap = new Map<string, AuspiciousDate>(
+    dates.map(d => [`${d.date.getFullYear()}-${d.date.getMonth()}-${d.date.getDate()}`, d])
   );
   const bigJiSet = new Set(
     dates.filter(d => d.luckLevel === '大吉').map(d => `${d.date.getFullYear()}-${d.date.getMonth()}-${d.date.getDate()}`)
@@ -62,18 +62,20 @@ export function CalendarView({ dates, month, onPrev, onNext }: CalendarViewProps
         {cells.map((day, i) => {
           if (!day) return <div key={i} />;
           const key = `${year}-${m}-${day}`;
-          const isAusp = auspSet.has(key);
+          const auspDate = dateMap.get(key);
+          const isAusp = !!auspDate;
           const isBig = bigJiSet.has(key);
           const lunar = getLunarDate(new Date(year, m, day));
           return (
             <div
               key={i}
+              onClick={() => auspDate && onSelectDate?.(auspDate)}
               className={cn(
                 'relative flex flex-col items-center justify-center rounded-lg py-1.5 transition-all duration-150',
                 isAusp
                   ? isBig
-                    ? 'bg-gold/15 border border-gold/40'
-                    : 'bg-jade/10 border border-jade/25'
+                    ? 'bg-gold/15 border border-gold/40 cursor-pointer active:scale-95'
+                    : 'bg-jade/10 border border-jade/25 cursor-pointer active:scale-95'
                   : 'hover:bg-white/3'
               )}
             >

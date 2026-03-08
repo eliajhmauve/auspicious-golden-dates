@@ -3,6 +3,7 @@ import { StarfieldBg } from '@/components/auspicious/StarfieldBg';
 import { EventTypeGrid, type EventType } from '@/components/auspicious/EventTypeGrid';
 import { DateCard } from '@/components/auspicious/DateCard';
 import { CalendarView } from '@/components/auspicious/CalendarView';
+import { DateDetailDrawer } from '@/components/auspicious/DateDetailDrawer';
 import { getAuspiciousDates, type AuspiciousDate } from '@/lib/lunarCalendar';
 import { Sparkles, ChevronRight, LayoutGrid, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -38,6 +39,7 @@ export default function AuspiciousPage() {
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [calendarMonth, setCalendarMonth] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [drawerDate, setDrawerDate] = useState<AuspiciousDate | null>(null);
 
   const handleSearch = () => {
     if (!selectedEvent) return;
@@ -212,7 +214,7 @@ export default function AuspiciousPage() {
             ) : viewMode === 'list' ? (
               <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1 scrollbar-thin">
                 {results.map((d, i) => (
-                  <DateCard key={i} d={d} />
+                  <DateCard key={i} d={d} onSelect={setDrawerDate} />
                 ))}
               </div>
             ) : (
@@ -231,6 +233,7 @@ export default function AuspiciousPage() {
                       month={mDate}
                       onPrev={() => {}}
                       onNext={() => {}}
+                      onSelectDate={setDrawerDate}
                     />
                   );
                 })}
@@ -247,6 +250,9 @@ export default function AuspiciousPage() {
           </p>
         </div>
       </div>
+
+      {/* Detail Drawer */}
+      <DateDetailDrawer date={drawerDate} onClose={() => setDrawerDate(null)} />
     </div>
   );
 }
