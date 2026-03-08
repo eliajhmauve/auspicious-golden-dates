@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { ArrowUp } from 'lucide-react';
 import { StarfieldBg } from '@/components/auspicious/StarfieldBg';
 import { EventTypeGrid, type EventType } from '@/components/auspicious/EventTypeGrid';
 import { DateCard } from '@/components/auspicious/DateCard';
