@@ -263,7 +263,10 @@ export default function AuspiciousPage() {
                 {/* View toggle */}
                 <div className="flex items-center gap-1 glass-card rounded-xl p-1">
                   <button
-                    onClick={() => setViewMode('list')}
+                    onClick={() => {
+                      setViewMode('list');
+                      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
                       viewMode === 'list' ? 'bg-gold/15 text-gold' : 'text-[hsl(40,20%,50%)] hover:text-gold'
