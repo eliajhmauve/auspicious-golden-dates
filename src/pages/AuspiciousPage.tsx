@@ -39,6 +39,7 @@ export default function AuspiciousPage() {
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [calendarMonth, setCalendarMonth] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [drawerDate, setDrawerDate] = useState<AuspiciousDate | null>(null);
 
   const handleSearch = () => {
     if (!selectedEvent) return;
