@@ -41,6 +41,45 @@ export default function AuspiciousPage() {
   const [calendarMonth, setCalendarMonth] = useState(0);
   const [loading, setLoading] = useState(false);
   const [drawerDate, setDrawerDate] = useState<AuspiciousDate | null>(null);
+  const [sharing, setSharing] = useState(false);
+  const shareCardRef = useRef<HTMLDivElement>(null);
+
+  const handleShare = useCallback(async () => {
+    if (!shareCardRef.current || !results || !selectedEvent) return;
+    setSharing(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(shareCardRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null,
+        logging: false,
+      });
+      const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/png'));
+      if (!blob) return;
+
+      const rangeLabel = `${MONTH_OPTS[startIdx].label} — ${MONTH_OPTS[endIdx].label}`;
+      const filename = `吉日_${EVENT_LABELS[selectedEvent]}_${rangeLabel}.png`;
+
+      // Try native share sheet on mobile
+      if (navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: 'image/png' })] })) {
+        await navigator.share({
+          title: `${EVENT_LABELS[selectedEvent]} 吉日清單`,
+          files: [new File([blob], filename, { type: 'image/png' })],
+        });
+      } else {
+        // Fallback: direct download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } finally {
+      setSharing(false);
+    }
+  }, [results, selectedEvent, startIdx, endIdx]);
 
   const handleSearch = () => {
     if (!selectedEvent) return;
