@@ -233,6 +233,7 @@ export default function AuspiciousPage() {
                       month={mDate}
                       onPrev={() => {}}
                       onNext={() => {}}
+                      onSelectDate={setDrawerDate}
                     />
                   );
                 })}
